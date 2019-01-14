@@ -75,7 +75,7 @@ class Table {
 
         const actionButton = document.createElement('button');
         //deleteButton.className = 'material-icons';
-        actionButton.textContent = 'Add';
+        actionButton.textContent = this.type==='input'?'Add':'Calculate';
         actionButton.style.flex = 1;
         actionButton.style.margin = 0;
         actionButton.addEventListener('click', () => console.log('Вызываем Action'));
