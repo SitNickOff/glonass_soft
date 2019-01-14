@@ -1,0 +1,60 @@
+body {
+    background-color: #0A0A0A;
+    color: #00FF00;
+    margin: 0;
+}
+
+#root {
+    display: flex;
+    width: 100%;
+}
+
+.data {
+    display: flex;
+    margin: auto;
+    margin-top: 24px;
+}
+
+table.grid {
+    margin-left: 20px;
+}
+
+table.grid td.cell {
+    border: 1px solid #444;
+    border-right: none;
+    border-bottom: none;
+    background-color: transparent;
+    box-sizing: border-box;
+}
+
+table.grid td.cell:last-child {
+    border-right: 1px solid #444;
+}
+
+table.grid tr.row:last-child td.cell {
+    border-bottom: 1px solid #444;
+}
+
+table.grid td.cell.alive {
+    background-color: #00FF00;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.controls button {
+    color: #00FF00;
+    background-color: transparent;
+    border: 2px solid #00FF00;
+    outline: none;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.controls button:disabled {
+    color: #444;
+    border: 2px solid #444;
+}
