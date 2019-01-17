@@ -1,4 +1,4 @@
-class Table {
+export default class Table {
     constructor(data, type) {
         this.element = null;
 

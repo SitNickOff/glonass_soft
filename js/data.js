@@ -1,4 +1,6 @@
-class Data {
+import Table from './table.js';
+
+export default class Data {
     constructor(root) {
 
         const data1 = [
