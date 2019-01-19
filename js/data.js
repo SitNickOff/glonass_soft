@@ -1,53 +1,66 @@
 import Table from './table.js';
 
 export default class Data {
-    constructor(root) {
+    constructor(root, defaultData) {
 
-        const data1 = [
-            [1, 2],
-            [2, 4],
-            [4, 6],
-            [7, 7]
-        ];
-
-        const data2 = [
-            [2, -1],
-            [4, -1],
-            [6, 1],
-            [9, 2],
-            [11, 4]
-        ];
-
-        const data3 = [
-            [1.5, 0.5],
-            [3, 1.5],
-            [5, 3.5],
-            [8, 4.5]
-        ];
-
-        this.table1 = new Table(data1, 'input');
-        this.table2 = new Table(data2, 'input');
-        this.table3 = new Table(data3, 'result');
+        this._data = defaultData;        
 
         this.root = root;
-        this.element = null;
+        this.element = null;  
 
         this._init();        
     }
 
-    _init() {
-        const dataElement = document.createElement('div');
-
-        dataElement.className = 'data';
-
-        this.element = dataElement;
-
-        this._render();
+    get data() {
+        return this._data;
     }
 
-    _render() {
-        this.element.append(this.table1.element, this.table2.element, this.table3.element);
+    _createTables() {
+        this._tables =  this._data.map((table, index) => new Table(table, index, index+1>2?'result':'input'));
+    }
 
-        root.appendChild(this.element);
+    _init() {
+
+        this._createTables();
+    }
+
+    sendInitState(view) {
+        view.data = this._tables;
+    }
+
+    deleteDataRow(tblIndex, rowIndex) {
+        this._tables[tblIndex].deleteRow(rowIndex);
+        this.onChangeStateTables(this._tables);
+    }
+
+    addDataRow(tblIndex) {
+        this._tables[tblIndex].addRow();
+        this.onChangeStateTables(this._tables);
+    }
+
+    calculate(tblIndex) {
+        let newRows = [];
+        for (let i = 0; i < this._tables[0].rows.length; i++) {
+            if (typeof this._tables[1].rows[i] !== "undefined") {
+                newRows = [
+                    ...newRows,
+                    [
+                        (this._tables[0].rows[i][0]+this._tables[1].rows[i][0])/2,
+                        (this._tables[0].rows[i][1]+this._tables[1].rows[i][1])/2
+                    ]
+                ];
+            }            
+        }
+        this._tables[tblIndex].rows = newRows;
+        this.onChangeStateTables(this._tables);
+    }
+
+    changeTableValue(tblIndex, rowIndex, cellIndex, value) {
+        this._tables[tblIndex].changeValue(rowIndex, cellIndex, value);
+        this.onChangeStateTables(this._tables);    
+    }
+
+    change() {
+        this._render();
     }
 }

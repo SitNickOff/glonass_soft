@@ -7,12 +7,23 @@ body {
 #root {
     display: flex;
     width: 100%;
+    flex-direction: column;
 }
 
 .data {
     display: flex;
     margin: auto;
     margin-top: 24px;
+}
+
+.grid {
+    margin: 2rem auto;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+canvas.grid {
+    display: block;
 }
 
 table.grid {
