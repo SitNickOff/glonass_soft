@@ -53,7 +53,7 @@ export default class View {
                     });
                     const td = createElement('td', {className: 'cell', style: 'width: 70px;  padding: 5px;'}, field);
 
-                    tds = [...tds, td]  
+                    tds = [...tds, td];  
                 }      
 
                 if (data.type==='input') { 
