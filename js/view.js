@@ -1,10 +1,11 @@
 import { createElement } from './lib/dom.js';
 
 export default class View {
-    constructor(viewGraph, rootElement){
+    constructor(viewGraph, rootElement, colors){
         this.viewGraph = viewGraph;
         this.dataControls = null;
         this.rootElement = rootElement;
+        this.colors = colors;
 
         this.onClickDelete = Function.prototype;
     }
@@ -30,7 +31,7 @@ export default class View {
     
         const tbls = data.map((data, index) => {
 
-            const th = this._tableHeader(data.type);
+            const th = this._tableHeader(data.type, this.colors[index]);
             let trs = [th];        
 
             for (let i = 0; i < data.rows.length; i++) {   
@@ -43,11 +44,12 @@ export default class View {
                         width: '50px',
                         style: 'flex: 1; width: 100%;',
                         value: data.rows[i][j],
-                        disable: data.type === 'result'?true:false,
+                        disabled: data.type==='input'?false:true,
                         tblIndex: index,
                         rowIndex: i,
                         cellIndex: j,
-                        oninput: (event) => this._handleChangeValue(event)                        
+                        type: 'number',
+                        onchange: (event) => this._handleChangeValue(event)                        
                     });
                     const td = createElement('td', {className: 'cell', style: 'width: 70px;  padding: 5px;'}, field);
 
@@ -57,7 +59,7 @@ export default class View {
                 if (data.type==='input') { 
                     const deleteButton = createElement('button', {
                         textContent: 'delete', 
-                        style: 'margin: auto;',
+                        style: `margin: auto; color: ${this.colors[index]};border-color: ${this.colors[index]};`,
                         className: 'delete',
                         tblIndex: index,
                         onclick: event => this._handleDeleteRow(event)
@@ -74,7 +76,7 @@ export default class View {
 
             const actionButton = createElement('button', {
                 textContent:  data.type==='input'?'Add':'Calculate',
-                style: 'flex: 1; margin: 0;',
+                style: `color: ${this.colors[index]};border-color: ${this.colors[index]};flex: 1; margin: 0;`,
                 tblIndex: index,
                 btnAction: data.type==='input'?'add':'calculate',
                 onclick: (event) => this._handleActionEvent(event)
@@ -90,11 +92,11 @@ export default class View {
         this.dataControls = createElement('div', {style: 'display: flex; margin: auto; width: 800px;'}, ...tbls);
     }
 
-    _tableHeader(type) {
+    _tableHeader(type, color) {
         
 
-        const td1 = createElement('td', {className: 'cell', width: 60, textContent: 'X', style: 'padding: 5px; text-align: center;'});
-        const td2 = createElement('td', {className: 'cell', width: 60, textContent: 'Y', style: 'padding: 5px; text-align: center;'});
+        const td1 = createElement('td', {className: 'cell', width: 60, textContent: 'X', style: `color: ${color};padding: 5px; text-align: center;`});
+        const td2 = createElement('td', {className: 'cell', width: 60, textContent: 'Y', style: `color: ${color};padding: 5px; text-align: center;`});
 
         const tr = createElement('tr', {className: 'row'}, td1, td2);
 
@@ -120,7 +122,6 @@ export default class View {
 
     _handleActionEvent(event) {
         const tblIndex = event.target.tblIndex;
-        console.log(event.target.btnAction);
         if (event.target.btnAction === 'add')
             this.onClickAddRow(tblIndex);
 
@@ -138,8 +139,7 @@ export default class View {
         const tblIndex = event.target.tblIndex;
         const rowIndex = event.target.rowIndex;
         const cellIndex = event.target.cellIndex;
-        const value = +event.target.value===NaN?0:+event.target.value;
-        console.log(event.target.tblIndex, event.target.rowIndex, event.target.cellIndex, +event.target.value);
+        const value = +event.target.value;
         this.onChangeTableValue(tblIndex, rowIndex, cellIndex, value);
     }
 }

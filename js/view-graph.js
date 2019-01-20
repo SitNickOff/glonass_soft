@@ -25,8 +25,15 @@ export default class Graph {
 
         this._getLimitPosition();
 
+        this.baseIndexX = 1;
+
         this.rows = this.maxValueY - this.minValueY + 2;
         this.cols = this.maxValueX - this.minValueX + 2;
+        
+        if (this.cols-2>20) {
+            this.baseIndexX = 2;
+            //this.cols = (this.maxValueX - this.minValueX)*this.baseIndexX + 2;
+        }
 
         this.cellWidth = Math.round(this.width / this.cols); 
         this.cellHeight = Math.round(this.height / this.rows);
@@ -38,6 +45,9 @@ export default class Graph {
 
         this.X0 = this.startX - ((this.minValueX - 1 ) * this.cellWidth);
         this.Y0 = this.startY + ((this.maxValueY + 1 ) * this.cellHeight);
+
+        this.ordPos = this.X0<0.5?0.5:(this.X0>this.width-0.5?this.width-0.5:this.X0);
+        this.absPos = this.Y0>this.height-0.5?this.height-0.5:this.Y0;
 
         this._drawGrid();
 
@@ -51,14 +61,12 @@ export default class Graph {
         this.minValueY = null;
         this.data.forEach(table => {
             table.rows.forEach(row => {
-                if (!this.maxValueX||row[0]>this.maxValueX) this.maxValueX = row[0];
-                if (!this.minValueX||row[0]<this.minValueX) this.minValueX = row[0];
-                if (!this.maxValueY||row[1]>this.maxValueY) this.maxValueY = row[1];
-                if (!this.minValueY||row[1]<this.minValueY) this.minValueY = row[1];
+                if (this.maxValueX===null||row[0]>this.maxValueX) this.maxValueX = row[0];
+                if (this.minValueX===null||row[0]<this.minValueX) this.minValueX = row[0];
+                if (this.maxValueY===null||row[1]>this.maxValueY) this.maxValueY = row[1];
+                if (this.minValueY===null||row[1]<this.minValueY) this.minValueY = row[1];
             });
         });
-
-        console.log();
     }
 
     _createCanvas() {
@@ -73,34 +81,55 @@ export default class Graph {
     }
 
     _drawGraph(table, color) {
-
-        this._context.lineWidth = 3;
-        this._context.strokeStyle = color;
         const rows = table.rows
 
         rows.forEach((point, index)=> {
+            this._drawLine(
+                this.X0, 
+                this.Y0 - point[1] * this.cellHeight, 
+                point[0] * this.cellWidth + this.X0, 
+                this.Y0 - point[1] * this.cellHeight,
+                1,
+                color,
+                true
+            );
+
+            this._drawLine(
+                point[0] * this.cellWidth + this.X0, 
+                this.Y0, 
+                point[0] * this.cellWidth + this.X0, 
+                this.Y0 - point[1] * this.cellHeight,
+                1,
+                color,
+                true
+            );
+
+            //this._drawPoint(point[0], point[1], 5, color)
+            
+
             if(index>0) {
                 this._drawLine(
-                    rows[index-1][0] * this.cellWidth + this.X0, this.Y0 - rows[index-1][1] * this.cellHeight, 
-                    rows[index][0] * this.cellWidth + this.X0, this.Y0 - rows[index][1] * this.cellHeight
+                    rows[index-1][0] * this.cellWidth + this.X0, 
+                    this.Y0 - rows[index-1][1] * this.cellHeight, 
+                    rows[index][0] * this.cellWidth + this.X0, 
+                    this.Y0 - rows[index][1] * this.cellHeight,
+                    3,
+                    color
                 );
             }
         });
     }
 
     _drawGrid() {
-        this._context.lineWidth = 1;        
-        this._context.fillStyle = "#fff";
-        this._context.font = "15px Arial";        
+        
+         
+        
         
         for (let i = 1; i < this.rows; i++) {
             const rowY = i * this.cellHeight + 0.5;
 
-            this._context.strokeStyle = '#444';
-            this._drawLine(this.startX, rowY, this.endX, rowY);
-
-            this._context.strokeStyle = '#fff';
-            this._drawLine(this.X0, rowY, this.X0+5, rowY);
+            this._drawLine(this.startX, rowY, this.endX, rowY, 1, '#444');
+            this._drawLine(this.ordPos+5, rowY, this.ordPos-5, rowY, 1, '#fff');
             
 
             if (this.maxValueY - i + 1!==0){
@@ -111,46 +140,67 @@ export default class Graph {
                 
                 const colX = j * this.cellWidth + 0.5;
                 
-                this._context.strokeStyle = '#444';
-                this._drawLine(colX, this.startY, colX, this.endY);
-
-
-                this._context.strokeStyle = '#fff';
-                this._drawLine(colX, this.Y0, colX, this.Y0-5);                
+                this._drawLine(colX, this.startY, colX, this.endY, 1, '#444');
+                this._drawLine(colX, this.Y0+5, colX, this.Y0-5, 1, '#fff');                
 
                 if (j + this.minValueX -1!==0){
-                    this._addTextAbs(j + this.minValueX -1, colX);
+                    let valueAbs = Math.round((j + this.minValueX -1)*100)/100;
+                    this._addTextAbs(valueAbs, colX);
                 }
             
             }
-        }
+        }        
+
         
+        this._drawLine(this.startX, this.absPos, this.endX, this.absPos);
+        this._drawLine(this.ordPos, this.startY, this.ordPos, this.endY);
 
-        this._context.strokeStyle = '#fff';
-        this._drawLine(this.startX, this.Y0, this.endX, this.Y0);
-        this._drawLine(this.X0, this.startY, this.X0, this.endY);
-
-        //this._context.fillText("X", this.endX - 15 , this.Y0 - 15);
-        this._addTextAbs("X", this.endX - 15);
-        this._context.fillText("Y", this.X0 + 15 , this.startY + 15);
+        this._addTextAbs("X", this.ordPos === this.width-0.5?this.startX + 5:this.endX - 5 );
+        this._addTextOrd("Y", this.absPos === 0.5?this.endY - 5:this.startY + 5 );
     }
 
-    _addTextAbs(value, position) {
-        this._context.textBaseline = "bottom";
-        this._context.textAlign = "center";
-        this._context.fillText(value , position , this.Y0 - 15);
+    _addTextAbs(value, position, color) {
+        this._context.font = "15px Arial";
+        this._context.fillStyle = color === undefined?'#fff': color;
+        this._context.textBaseline = this.absPos === 0.5?"top":'bottom';
+        this._context.textAlign = "center";//absPos
+
+        let textPos = this.absPos === 0.5?(this.absPos + 10):(this.absPos - 10);
+        this._context.fillText(value , position , textPos);
     }
 
-    _addTextOrd(value, position) {
+    _addTextOrd(value, position, color) {        
+        this._context.font = "15px Arial"; 
+        this._context.fillStyle = color === undefined?'#fff': color;
         this._context.textBaseline = "middle";
-        this._context.textAlign = "left";
-        this._context.fillText(value , this.X0 + 15 , position);
+        this._context.textAlign = this.ordPos + 20>this.width?"right":"left";
+
+
+        let textPos = this.ordPos === this.width-0.5?(this.ordPos - 10):(this.ordPos + 10);
+        this._context.fillText(value , textPos , position);
     }
 
-    _drawLine(x1, y1, x2, y2) {
+    _drawLine(x1, y1, x2, y2, width, color, dashed) {
+        this._context.lineWidth = width === undefined? 1: width;
+        this._context.strokeStyle = color === undefined? '#fff': color;
+        if (dashed===true)
+            this._context.setLineDash([4*width,8*width]);
+        else
+            this._context.setLineDash([width,0])
+
         this._context.beginPath();
         this._context.moveTo(x1, y1);
         this._context.lineTo(x2, y2);
         this._context.stroke();
     }
+
+    _drawPoint(x1, y1, radius, color) {
+        this._context.strokeStyle = color === undefined? '#fff': color;  
+        this._context.fillStyle = color === undefined?'#fff': color;      
+
+        this._context.beginPath();
+        this._context.arc(x1, y1, radius, 0, 2 * Math.PI, true);
+        this._context.stroke();
+    }
+
 }
