@@ -61,12 +61,14 @@ export default class Graph {
         this.minValueY = null;
         this.data.forEach(table => {
             table.rows.forEach(row => {
-                if (this.maxValueX===null||row[0]>this.maxValueX) this.maxValueX = row[0];
-                if (this.minValueX===null||row[0]<this.minValueX) this.minValueX = row[0];
-                if (this.maxValueY===null||row[1]>this.maxValueY) this.maxValueY = row[1];
-                if (this.minValueY===null||row[1]<this.minValueY) this.minValueY = row[1];
+                if (this.maxValueX===null||Math.round(row[0])>this.maxValueX) this.maxValueX = Math.round(row[0]);
+                if (this.minValueX===null||Math.round(row[0])<this.minValueX) this.minValueX = Math.round(row[0]);
+                if (this.maxValueY===null||Math.round(row[1])>this.maxValueY) this.maxValueY = Math.round(row[1]);
+                if (this.minValueY===null||Math.round(row[1])<this.minValueY) this.minValueY = Math.round(row[1]);
             });
         });
+
+
     }
 
     _createCanvas() {
